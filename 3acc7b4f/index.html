@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>30 дней роста — дневник-практикум</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=PT+Serif:ital@0;1&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F6EFE3; --cream2:#FBF6EB; --ink:#2E2620; --soft:#6b5f4e; --hint:#a5977e;
+  --brass:#B08D42; --green:#4A6B57; --line:#D9CDB8;
+  --disp:'Cormorant Garamond', Georgia, serif; --body:'PT Serif', Georgia, serif; --ui:'PT Sans', system-ui, sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(120% 80% at 50% 0%, var(--cream2) 0%, var(--cream) 55%, #EFE5D2 100%) fixed, var(--cream);
+  color:var(--ink); font-family:var(--body); min-height:100vh}
+button{font-family:var(--ui); cursor:pointer}
+
+.wrap{max-width:680px; margin:0 auto; padding:28px 22px 90px}
+
+/* верхняя полоса прогресса */
+.top{position:sticky; top:0; z-index:9; background:rgba(246,239,227,.92); backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line); transition:opacity .4s}
+.top .in{max-width:680px; margin:0 auto; display:flex; align-items:center; gap:14px; padding:12px 22px}
+.top .name{font-family:var(--ui); font-weight:700; font-size:13px; letter-spacing:.18em; color:var(--green); text-transform:uppercase}
+.top .bar{flex:1; height:4px; border-radius:99px; background:#E9DFC9; overflow:hidden}
+.top .bar i{display:block; height:100%; width:0; border-radius:99px;
+  background:linear-gradient(90deg, var(--brass), #C9A962); transition:width .8s cubic-bezier(.16,1,.3,1)}
+.top .cnt{font-family:var(--ui); font-size:13px; color:var(--soft); min-width:46px; text-align:right}
+
+/* экраны */
+.screen{display:none}
+.screen.active{display:block; animation:screenIn .65s cubic-bezier(.16,1,.3,1) both}
+@keyframes screenIn{from{opacity:0; transform:translateY(18px)} to{opacity:1; transform:none}}
+
+/* появление элементов каскадом */
+.r{opacity:0; transform:translateY(16px); animation:rise .7s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes rise{to{opacity:1; transform:none}}
+.d1{animation-delay:.08s}.d2{animation-delay:.18s}.d3{animation-delay:.3s}.d4{animation-delay:.44s}.d5{animation-delay:.58s}.d6{animation-delay:.72s}
+
+/* обложка */
+.cover{min-height:88vh; display:flex; flex-direction:column; justify-content:center; text-align:center}
+.over{font-family:var(--ui); font-weight:700; letter-spacing:.32em; font-size:13px; color:var(--green); text-transform:uppercase}
+h1{font-family:var(--disp); font-weight:700; font-size:clamp(52px, 13vw, 88px); line-height:1.02; margin:22px 0 14px}
+h1 em{font-style:italic; color:var(--brass)}
+.sub{font-size:17px; color:var(--soft); max-width:420px; margin:0 auto; line-height:1.55}
+.orn{margin:34px auto; width:0; max-width:220px; border-top:1px solid var(--brass); position:relative; animation:draw 1.4s cubic-bezier(.16,1,.3,1) .5s forwards}
+@keyframes draw{to{width:220px}}
+.orn::after{content:"❦"; position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--cream);
+  padding:0 10px; color:var(--brass); font-size:15px; opacity:0; animation:rise .6s ease 1.6s forwards}
+.author{font-family:var(--ui); font-weight:700; font-size:13px; letter-spacing:.18em; text-transform:uppercase}
+
+.btn{display:inline-block; border:1.5px solid var(--brass); background:var(--brass); color:#fff;
+  font-weight:700; font-size:16px; letter-spacing:.06em; border-radius:999px; padding:15px 38px;
+  transition:transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s, background .35s}
+.btn:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(176,141,66,.35)}
+.btn.ghost{background:transparent; color:var(--brass)}
+.btn.ghost:hover{background:rgba(176,141,66,.08)}
+
+/* интро */
+h2{font-family:var(--disp); font-weight:700; font-size:34px; margin:26px 0 18px}
+.intro p{font-size:16.5px; line-height:1.7; margin-bottom:14px}
+.card{background:var(--cream2); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:12px}
+.card b{font-family:var(--ui); color:var(--green)}
+
+/* трекер */
+.grid{display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin:26px 0 10px}
+@media(min-width:520px){.grid{grid-template-columns:repeat(6,1fr)}}
+.cell{aspect-ratio:1; border-radius:50%; border:1.5px solid var(--brass); background:transparent; position:relative;
+  font-family:var(--ui); font-weight:700; font-size:17px; color:var(--brass); overflow:hidden;
+  transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s}
+.cell:hover{transform:scale(1.07)}
+.cell::before{content:""; position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle, var(--brass) 0%, #C9A962 100%);
+  transform:scale(0); transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.cell.done{color:#fff; box-shadow:0 6px 16px rgba(176,141,66,.35)}
+.cell.done::before{transform:scale(1)}
+.cell.today{box-shadow:0 0 0 3px rgba(74,107,87,.35)}
+.cell span{position:relative; z-index:1}
+.trhint{font-style:italic; color:var(--soft); font-size:14.5px; text-align:center; margin-top:16px}
+
+/* страница дня */
+.daytop{display:flex; justify-content:space-between; align-items:baseline; margin:26px 0 6px}
+.daynum{font-family:var(--ui); font-weight:700; font-size:13px; letter-spacing:.22em; color:var(--green); text-transform:uppercase}
+.weekname{font-family:var(--ui); font-size:12.5px; color:var(--hint)}
+.thought{font-family:var(--disp); font-style:italic; font-weight:500; font-size:clamp(21px,5.6vw,26px); line-height:1.5; color:#3d352b; margin-top:10px}
+.sign{font-family:var(--ui); font-size:13px; color:var(--brass); margin-top:10px; letter-spacing:.08em}
+.taskbox{border:1px solid var(--brass); background:var(--cream2); border-radius:14px; padding:18px 20px; margin-top:22px}
+.tasklabel{font-family:var(--ui); font-weight:700; font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--green); margin-bottom:8px}
+.taskbox p{font-size:16px; line-height:1.6}
+.seal{display:inline-flex; align-items:center; gap:14px; border:1.5px solid var(--brass); border-radius:999px;
+  padding:11px 22px; background:#FFFDF7; margin-top:20px; animation:sealIn .8s cubic-bezier(.34,1.4,.5,1) both; animation-delay:.5s}
+@keyframes sealIn{from{opacity:0; transform:scale(.85)} to{opacity:1; transform:none}}
+.seal span{font-family:var(--ui); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--hint)}
+.seal b{font-family:var(--ui); font-weight:700; font-size:17px; letter-spacing:.1em; color:var(--green)}
+
+textarea{width:100%; min-height:170px; margin-top:22px; padding:16px 2px; border:none; border-radius:0; resize:vertical;
+  background:repeating-linear-gradient(to bottom, transparent 0 35px, var(--line) 35px 36px);
+  font-family:var(--body); font-size:16.5px; line-height:36px; color:var(--ink); outline:none; caret-color:var(--brass)}
+textarea::placeholder{color:var(--hint); font-style:italic}
+.saved{font-family:var(--ui); font-size:12.5px; color:var(--green); opacity:0; transition:opacity .5s; margin-top:6px}
+.saved.show{opacity:.85}
+
+.checks{margin-top:20px; display:flex; flex-direction:column; gap:12px}
+.chk{display:flex; align-items:center; gap:12px; font-family:var(--ui); font-size:15px; color:var(--soft); cursor:pointer; user-select:none}
+.box{width:24px; height:24px; border-radius:7px; border:1.5px solid var(--brass); background:#FFFDF7; position:relative; flex-shrink:0;
+  transition:background .35s, box-shadow .35s}
+.box::after{content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:700; font-size:15px; transform:scale(0); transition:transform .35s cubic-bezier(.34,1.4,.5,1)}
+.chk.on .box{background:var(--brass); box-shadow:0 4px 12px rgba(176,141,66,.35)}
+.chk.on .box::after{transform:scale(1)}
+.chk.on{color:var(--ink)}
+
+.livebtn{margin-top:26px; width:100%; border:1.5px solid var(--green); background:transparent; color:var(--green);
+  font-weight:700; font-size:16px; border-radius:999px; padding:15px; transition:all .4s cubic-bezier(.16,1,.3,1)}
+.livebtn.on{background:var(--green); color:#fff; box-shadow:0 8px 22px rgba(74,107,87,.3)}
+
+.nav{display:flex; gap:12px; margin-top:26px}
+.nav button{flex:1; border:1px solid var(--line); background:var(--cream2); color:var(--soft);
+  font-size:14.5px; border-radius:12px; padding:13px; transition:all .3s}
+.nav button:hover{border-color:var(--brass); color:var(--ink)}
+
+.final{text-align:center; padding-top:8vh}
+.final .fq{font-family:var(--disp); font-style:italic; font-size:clamp(24px,6vw,32px); line-height:1.5; max-width:480px; margin:0 auto 26px}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001s !important; transition-duration:.001s !important}
+}
+</style>
+</head>
+<body>
+<div class="top" id="top" style="display:none">
+  <div class="in">
+    <span class="name">30 дней роста</span>
+    <div class="bar"><i id="bar"></i></div>
+    <span class="cnt" id="cnt">0/30</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+<section class="screen active" id="s-cover">
+  <div class="cover">
+    <div class="over r d1">дневник-практикум</div>
+    <h1 class="r d2">30 ДНЕЙ<br><em>РОСТА</em></h1>
+    <div class="sub r d3">Один месяц, чтобы вернуться к себе: тёплая мысль, задание на пять минут и слово дня — каждый день</div>
+    <div class="orn"></div>
+    <div class="author r d4">Макаров · @makarov.x1</div>
+    <div id="fileWarn" style="display:none; margin:20px auto 0; max-width:430px; text-align:left; border:1px solid var(--brass); background:var(--cream2); border-radius:12px; padding:14px 16px; font-family:var(--ui); font-size:13.5px; line-height:1.55; color:var(--soft)">
+      ⚠️ <b>Важно, чтобы записи не пропали:</b> открывай дневник всегда по своей ссылке из покупки (или по одному и тому же сохранённому файлу). Каждая новая скачанная копия файла — это чистый дневник. Резервная копия: «Мой путь» → «сохранить прогресс в файл».
+    </div>
+    <div class="r d5" style="margin-top:32px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+      <button class="btn" id="startBtn" onclick="start()">Начать путь</button>
+      <button class="btn ghost" onclick="show('s-intro')">Как это работает</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="s-intro">
+  <h2 class="r d1">Как работать с дневником</h2>
+  <div class="intro">
+    <p class="r d1">Это не курс и не учебник. Это тридцать спокойных встреч с собой, по десять минут в день.</p>
+    <div class="card r d2"><b>Мысль дня</b> — прочитай не спеша, лучше утром, с чаем.</div>
+    <div class="card r d2"><b>Задание на 5 минут</b> — маленькое действие. Именно действия меняют жизнь.</div>
+    <div class="card r d3"><b>Слово дня</b> — твой якорь. Возвращайся к нему в течение дня.</div>
+    <div class="card r d3"><b>Записи</b> — пиши прямо здесь. Всё сохраняется на твоём устройстве и никуда не отправляется.</div>
+    <div class="card r d4"><b>Вечерние отметки</b> — три галочки перед сном. Твоя честность с собой.</div>
+    <p class="r d5">Пропущен день — не страшно. Просто продолжай со следующего: этот дневник нельзя провалить.</p>
+    <p class="r d5"><b>Правило одно:</b> не бросай себя. Остальное приложится.</p>
+    <div class="r d6" style="margin-top:26px"><button class="btn" onclick="start()">К дневнику</button></div>
+  </div>
+</section>
+
+<section class="screen" id="s-tracker">
+  <h2 class="r d1">Мой путь</h2>
+  <p class="r d2" style="color:var(--soft); font-size:15.5px; line-height:1.6">Кружок закрашивается, когда день прожит. Нажми на любой день, чтобы открыть его.</p>
+  <div class="grid r d3" id="grid"></div>
+  <div class="trhint r d4">Неидеально закрашенный трекер — это жизнь.<br>Идеально пустой — это «с понедельника».</div>
+  <div class="r d5" style="text-align:center; margin-top:24px">
+    <button class="btn" id="contBtn" onclick="openDay(state.last||1)">Продолжить</button>
+  </div>
+  <div class="r d6" style="text-align:center; margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+    <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="backup()">💾 сохранить прогресс в файл</button>
+    <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="document.getElementById('restoreInp').click()">↩ восстановить из файла</button>
+    <input type="file" id="restoreInp" accept=".json,application/json" style="display:none" onchange="restore(this)">
+  </div>
+</section>
+
+<section class="screen" id="s-day">
+  <div class="daytop"><span class="daynum" id="dnum"></span><span class="weekname" id="wname"></span></div>
+  <h2 id="dtitle" style="margin-top:6px"></h2>
+  <p class="thought" id="dthought"></p>
+  <p class="sign">— Макаров</p>
+  <div class="taskbox"><div class="tasklabel">Задание на 5 минут</div><p id="dtask"></p></div>
+  <div><div class="seal" id="sealBox"><span>слово дня</span><b id="dword"></b></div></div>
+  <textarea id="dtext" placeholder="Твои мысли и ответы — сюда…"></textarea>
+  <div class="saved" id="saved">сохранено ✓</div>
+  <div class="checks">
+    <label class="chk" id="c0" onclick="toggleCheck(0)"><span class="box"></span>задание выполнено</label>
+    <label class="chk" id="c1" onclick="toggleCheck(1)"><span class="box"></span>запись сделана</label>
+    <label class="chk" id="c2" onclick="toggleCheck(2)"><span class="box"></span>доброе слово себе сказано</label>
+  </div>
+  <button class="livebtn" id="liveBtn" onclick="toggleLived()">День прожит</button>
+  <div class="nav">
+    <button onclick="prevDay()" id="prevB">← предыдущий</button>
+    <button onclick="show('s-tracker'); renderGrid()">мой путь</button>
+    <button onclick="nextDay()" id="nextB">следующий →</button>
+  </div>
+</section>
+
+<section class="screen" id="s-final">
+  <div class="final">
+    <div class="fq r d1">«Перемены — это просто дни,<br>в которые ты не бросаешь себя».</div>
+    <p class="r d2" style="font-size:16.5px; line-height:1.7; color:var(--soft); max-width:420px; margin:0 auto">
+      Тридцать дней позади. Я рядом каждый день — в <b>@makarov.x1</b>.<br>
+      Приходи в комментарии и напиши своё слово: <b style="color:var(--green)">ПРОДОЛЖАЮ</b>.</p>
+    <div class="orn"></div>
+    <div class="r d3" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+      <button class="btn ghost" onclick="show('s-tracker'); renderGrid()">мой путь</button>
+      <button class="btn" onclick="exportNotes()">скачать мои записи</button>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+const DAYS = [{"n": 1, "week": 1, "weekName": "Возвращение к себе", "title": "Точка старта", "thought": "Ты открываешь этот дневник — значит, что-то внутри уже решило меняться. Не завтра и не с понедельника. Сегодня. Этого достаточно.", "task": "Напиши, как ты хочешь видеть себя через 30 дней. Без «правильных» слов — как чувствуешь.", "word": "НАЧИНАЮ"}, {"n": 2, "week": 1, "weekName": "Возвращение к себе", "title": "Честный взгляд", "thought": "Перемены начинаются не с планов, а с честного взгляда: что в моей жизни давно просит перемен? Признать — уже половина пути.", "task": "Запиши три вещи, которые забирают твои силы. Просто назови их по имени.", "word": "ВИЖУ"}, {"n": 3, "week": 1, "weekName": "Возвращение к себе", "title": "Разрешение", "thought": "Ты столько лет живёшь для других, что некогда спросить себя: а мне что нужно? Сегодня разрешаю: думай о себе без чувства вины.", "task": "Сделай одну вещь только для себя: чай в тишине, прогулка, любимая музыка. Запиши, что выбираешь.", "word": "СЕБЕ"}, {"n": 4, "week": 1, "weekName": "Возвращение к себе", "title": "Чистый лист", "thought": "Прошлое нельзя переписать, но можно перестать давать ему решать за тебя. Чистый лист — это не забыть. Это перестать оглядываться.", "task": "Запиши одну обиду, которую пора оставить в прошлом. И рядом — почему она тебе больше не нужна.", "word": "ОТПУСКАЮ"}, {"n": 5, "week": 1, "weekName": "Возвращение к себе", "title": "Дом, в котором ты живёшь", "thought": "Твоё тело — не враг и не проект. Это дом, в котором ты живёшь. Дом любят не за ремонт, а за тепло.", "task": "Пять минут заботы о теле: разминка, тёплый душ, стакан воды не спеша — что отзовётся. Отметь, что получилось.", "word": "ЗАБОТА"}, {"n": 6, "week": 1, "weekName": "Возвращение к себе", "title": "Слова о себе", "thought": "Послушай, как ты говоришь о себе. «У меня не получится» — это не факт, это привычка. А привычки меняются.", "task": "Поймай сегодня одну фразу самокритики и перепиши её мягче. Запиши сюда обе.", "word": "МОГУ"}, {"n": 7, "week": 1, "weekName": "Возвращение к себе", "title": "Первый итог", "thought": "Семь дней возвращения к себе. Оглянись: ты уже не там, где в начале недели.", "task": "Перечитай записи недели. Подчеркни одну, которая отзывается сильнее всего.", "word": "РАСТУ"}, {"n": 8, "week": 2, "weekName": "Наведение порядка", "title": "Утро — твоё", "thought": "Как начинается утро — так идёт день. Не хватайся за телефон первым делом: сначала ты, потом мир.", "task": "Завтра утром — пять минут без телефона: вода, окно, три глубоких вдоха. Запиши, каким было это утро.", "word": "УТРО"}, {"n": 9, "week": 2, "weekName": "Наведение порядка", "title": "Пространство", "thought": "В доме, где меньше лишнего, легче дышать. Порядок вокруг наводит порядок внутри.", "task": "Разбери сегодня одну полку или один ящик. Только один. Запиши, что изменилось внутри.", "word": "ПОРЯДОК"}, {"n": 10, "week": 2, "weekName": "Наведение порядка", "title": "Куда уходят силы", "thought": "Силы не берутся из ниоткуда. Посмотри честно: что тебя наполняет, а что опустошает?", "task": "Раздели записи на два списка: «наполняет» и «забирает». По три пункта в каждом.", "word": "ЭНЕРГИЯ"}, {"n": 11, "week": 2, "weekName": "Наведение порядка", "title": "Спокойное «нет»", "thought": "Каждое «да» через силу — это «нет» самому себе. Отказывать можно спокойно и по-доброму.", "task": "Скажи сегодня одно спокойное «нет» тому, что тебе не нужно. Запиши, как прошло.", "word": "ГРАНИЦА"}, {"n": 12, "week": 2, "weekName": "Наведение порядка", "title": "Фундамент", "thought": "Усталость делает из тебя тень. Сон — не роскошь, а фундамент.", "task": "Ляг сегодня на полчаса раньше. Перед сном — не лента, а пара строк сюда: за что благодаришь этот день.", "word": "ОТДЫХ"}, {"n": 13, "week": 2, "weekName": "Наведение порядка", "title": "Свой темп", "thought": "Ты не опаздываешь. У твоей жизни свой темп. Спешка ворует радость.", "task": "Сделай одно привычное дело нарочито медленно и с удовольствием. Запиши, какое.", "word": "ТЕМП"}, {"n": 14, "week": 2, "weekName": "Наведение порядка", "title": "Уважение к себе", "thought": "Две недели позади. Порядок — это не про идеальность. Это про уважение к себе.", "task": "Отметь в трекере, сколько дней из четырнадцати получились. Любое число — правильное.", "word": "ИДУ"}, {"n": 15, "week": 3, "weekName": "Сила маленьких шагов", "title": "Экватор", "thought": "Половина пути. Большие перемены не выглядят большими изнутри — они выглядят как обычные дни, в которые ты продолжаешь.", "task": "Напиши себе три слова поддержки — такие, какие сказал бы самый близкий человек.", "word": "ПОЛОВИНА"}, {"n": 16, "week": 3, "weekName": "Сила маленьких шагов", "title": "Мечта — это план", "thought": "Мечтать не вредно. Вредно хоронить мечты в столе. Мечта — это план, у которого пока нет первого шага.", "task": "Запиши одну мечту и один крошечный шаг к ней, который можно сделать на этой неделе.", "word": "МЕЧТА"}, {"n": 17, "week": 3, "weekName": "Сила маленьких шагов", "title": "Тот самый шаг", "thought": "Маленький шаг сегодня выглядит смешно. Триста шестьдесят пять шагов подряд выглядят как чудо. Но это не чудо — это дни, в которые ты не сдаёшься.", "task": "Сделай шаг, записанный вчера. Прямо сегодня. Отметь здесь, что получилось.", "word": "ШАГ"}, {"n": 18, "week": 3, "weekName": "Сила маленьких шагов", "title": "Только с собой", "thought": "Не сравнивай себя ни с кем. Сравнивай себя только с собой из вчера — и сегодня ты уже впереди.", "task": "Запиши три вещи, которые есть у тебя сейчас — знания, умения, люди, — которых не было пять лет назад.", "word": "ВПЕРЁД"}, {"n": 19, "week": 3, "weekName": "Сила маленьких шагов", "title": "Ошибка — информация", "thought": "Ошибка — не приговор, а информация. Не получилось — значит, теперь понятно, как не работает. Это тоже движение.", "task": "Вспомни одну «ошибку», которая в итоге чему-то научила. Запиши этот урок.", "word": "ОПЫТ"}, {"n": 20, "week": 3, "weekName": "Сила маленьких шагов", "title": "Топливо", "thought": "Радость не надо заслуживать. Она не награда за страдания — она топливо, чтобы жить.", "task": "Запланируй на завтра одну маленькую радость. Конкретно: что и когда.", "word": "РАДОСТЬ"}, {"n": 21, "week": 3, "weekName": "Сила маленьких шагов", "title": "Три недели", "thought": "Три недели. Это уже больше, чем у большинства обещающих себе «с понедельника».", "task": "Перечитай день первый. Запиши, что из написанного уже начало сбываться.", "word": "ВИЖУ РОСТ"}, {"n": 22, "week": 4, "weekName": "Новая высота", "title": "Среда роста", "thought": "Рядом с одними людьми ты расцветаешь, рядом с другими — гаснешь. Это не мелочь. Это среда, в которой ты растёшь.", "task": "Запиши двух людей, после которых тебе светло. С одним из них свяжись сегодня.", "word": "СВЕТ"}, {"n": 23, "week": 4, "weekName": "Новая высота", "title": "Оптика", "thought": "Благодарность — не вежливость, а оптика. Кто умеет видеть хорошее, у того его становится больше.", "task": "Запиши пять благодарностей этому месяцу — крупных и совсем крошечных.", "word": "БЛАГОДАРЮ"}, {"n": 24, "week": 4, "weekName": "Новая высота", "title": "За руку со страхом", "thought": "Смелость — это не отсутствие страха. Это шаг вместе со страхом, за руку с ним.", "task": "Назови один страх, который держит на месте. Запиши: что реально случится в худшем случае? А что будет, если получится?", "word": "СМЕЛОСТЬ"}, {"n": 25, "week": 4, "weekName": "Новая высота", "title": "Своя дорога", "thought": "Всегда иди своей дорогой. Чужая карта не приведёт в твоё место.", "task": "Запиши одно решение, которое примешь по-своему — даже если «так не принято».", "word": "МОЯ ДОРОГА"}, {"n": 26, "week": 4, "weekName": "Новая высота", "title": "Тепло возвращается", "thought": "Когда делишься теплом — его не становится меньше. Так устроено.", "task": "Сделай сегодня одно доброе дело без повода. Запиши, что это даст внутри.", "word": "ТЕПЛО"}, {"n": 27, "week": 4, "weekName": "Новая высота", "title": "План плохого дня", "thought": "Плохие дни будут. Вопрос не в том, как их избежать, а в том, что ты делаешь в такой день. Система сильнее настроения.", "task": "Составь свой «план плохого дня»: три простых действия, которые возвращают тебя к себе.", "word": "ОПОРА"}, {"n": 28, "week": 4, "weekName": "Новая высота", "title": "Присмотрись", "thought": "Четыре недели. Присмотрись к себе: походка, взгляд, слова. Изменился не мир — изменения в тебе.", "task": "Запиши три самых заметных изменения за этот месяц.", "word": "ПЕРЕМЕНА"}, {"n": 29, "week": 4, "weekName": "Новая высота", "title": "Письмо себе", "thought": "Напиши письмо себе через год. Расскажи, как живёшь и что сбылось. Пиши в настоящем времени — как будто уже.", "task": "Письмо — на этой странице. Поставь дату: сегодняшнее число, но следующий год.", "word": "ВЕРЮ"}, {"n": 30, "week": 4, "weekName": "Новая высота", "title": "Это разгон", "thought": "Тридцать дней — это не финиш. Это разгон. Теперь ты знаешь главный секрет: перемены — это просто дни, в которые ты не бросаешь себя.", "task": "Выбери три ритуала из этого месяца, которые забираешь с собой навсегда. Запиши их.", "word": "ПРОДОЛЖАЮ"}];
+const KEY = "diary30_v1";
+let state = JSON.parse(localStorage.getItem(KEY) || "{}");
+state.notes = state.notes || {}; state.checks = state.checks || {}; state.lived = state.lived || {};
+let cur = 1;
+
+const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+const doneCount = () => Object.values(state.lived).filter(Boolean).length;
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  const el = document.getElementById(id);
+  void el.offsetWidth; // перезапуск анимации
+  el.classList.add("active");
+  document.getElementById("top").style.display = (id === "s-cover") ? "none" : "block";
+  window.scrollTo({top:0});
+  updateBar();
+}
+function updateBar(){
+  const n = doneCount();
+  document.getElementById("bar").style.width = (n/30*100) + "%";
+  document.getElementById("cnt").textContent = n + "/30";
+}
+function start(){
+  show("s-tracker"); renderGrid();
+  document.getElementById("contBtn").textContent = state.last ? ("Продолжить — день " + state.last) : "Начать с дня 1";
+}
+function renderGrid(){
+  const g = document.getElementById("grid"); g.innerHTML = "";
+  for(let i = 1; i <= 30; i++){
+    const b = document.createElement("button");
+    b.className = "cell" + (state.lived[i] ? " done" : "") + (i === (state.last||1) ? " today" : "");
+    b.innerHTML = "<span>" + (state.lived[i] ? "✓" : i) + "</span>";
+    b.onclick = () => openDay(i);
+    g.appendChild(b);
+  }
+  updateBar();
+}
+function openDay(n){
+  cur = n; state.last = n; save();
+  const d = DAYS[n-1];
+  document.getElementById("dnum").textContent = "День " + d.n;
+  document.getElementById("wname").textContent = "неделя " + d.week + " · " + d.weekName;
+  document.getElementById("dtitle").textContent = d.title;
+  document.getElementById("dthought").textContent = "«" + d.thought + "»";
+  document.getElementById("dtask").textContent = d.task;
+  document.getElementById("dword").textContent = d.word;
+  const ta = document.getElementById("dtext");
+  ta.value = state.notes[n] || "";
+  (state.checks[n] || [false,false,false]).forEach((v,i) =>
+    document.getElementById("c"+i).classList.toggle("on", v));
+  refreshLived();
+  document.getElementById("prevB").style.visibility = n > 1 ? "visible" : "hidden";
+  document.getElementById("nextB").textContent = n < 30 ? "следующий →" : "финал →";
+  // перезапуск анимации печати
+  const seal = document.getElementById("sealBox");
+  seal.style.animation = "none"; void seal.offsetWidth; seal.style.animation = "";
+  show("s-day");
+}
+function refreshLived(){
+  document.getElementById("liveBtn").classList.toggle("on", !!state.lived[cur]);
+  document.getElementById("liveBtn").textContent = state.lived[cur] ? "День прожит ✓" : "День прожит";
+}
+function toggleCheck(i){
+  const c = state.checks[cur] || [false,false,false];
+  c[i] = !c[i]; state.checks[cur] = c; save();
+  document.getElementById("c"+i).classList.toggle("on", c[i]);
+  if(c.every(Boolean) && !state.lived[cur]){ state.lived[cur] = true; save(); refreshLived(); updateBar(); }
+}
+function toggleLived(){
+  state.lived[cur] = !state.lived[cur]; save(); refreshLived(); updateBar();
+}
+function prevDay(){ if(cur > 1) openDay(cur - 1); }
+function nextDay(){ cur < 30 ? openDay(cur + 1) : show("s-final"); }
+
+let saveT;
+document.getElementById("dtext").addEventListener("input", e => {
+  state.notes[cur] = e.target.value; save();
+  const s = document.getElementById("saved");
+  s.classList.add("show");
+  clearTimeout(saveT); saveT = setTimeout(() => s.classList.remove("show"), 1400);
+});
+
+function backup(){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state)], {type:"application/json"}));
+  a.download = "мой_прогресс_30_дней.json";
+  a.click();
+}
+function restore(inp){
+  const f = inp.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try{
+      const d = JSON.parse(rd.result);
+      if(!d.notes && !d.lived) throw 0;
+      state = d; state.notes = state.notes||{}; state.checks = state.checks||{}; state.lived = state.lived||{};
+      save(); renderGrid();
+      alert("Прогресс восстановлен ✓");
+    }catch(e){ alert("Это не файл прогресса дневника."); }
+  };
+  rd.readAsText(f);
+}
+function exportNotes(){
+  let out = "МОИ 30 ДНЕЙ РОСТА\n=================\n\n";
+  for(let i = 1; i <= 30; i++){
+    const d = DAYS[i-1];
+    out += "День " + i + " — " + d.title + " (слово: " + d.word + ")" + (state.lived[i] ? " ✓" : "") + "\n";
+    out += (state.notes[i] || "—") + "\n\n";
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([out], {type:"text/plain;charset=utf-8"}));
+  a.download = "мои_30_дней_роста.txt";
+  a.click();
+}
+updateBar();
+if(location.protocol !== "https:" && location.protocol !== "http:"){
+  document.getElementById("fileWarn").style.display = "block";
+}
+</script>
+</body>
+</html>
