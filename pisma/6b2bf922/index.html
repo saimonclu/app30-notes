@@ -165,7 +165,9 @@ button{font-family:var(--ui); cursor:pointer}
 .top{position:sticky; top:0; z-index:9; background:rgba(246,239,227,.92); backdrop-filter:blur(6px);
   border-bottom:1px solid var(--line)}
 .top .in{max-width:680px; margin:0 auto; display:flex; align-items:center; gap:14px; padding:12px 22px}
-.top .name{font-family:var(--ui); font-weight:700; font-size:13px; letter-spacing:.18em; color:var(--green); text-transform:uppercase}
+.top .name{font-family:var(--ui); font-weight:700; font-size:13px; letter-spacing:.18em; color:var(--green); text-transform:uppercase;
+  background:none; border:none; cursor:pointer; padding:0}
+.top .name:hover{color:var(--brass)}
 .top .bar{flex:1; height:4px; border-radius:99px; background:#E9DFC9; overflow:hidden}
 .top .bar i{display:block; height:100%; width:0; border-radius:99px;
   background:linear-gradient(90deg, var(--brass), var(--brass2)); transition:width .8s cubic-bezier(.16,1,.3,1)}
@@ -287,7 +289,7 @@ textarea::placeholder{color:var(--hint); font-style:italic}
 <div class="preview-banner" id="pv" style="display:none">режим предпросмотра — все письма открыты</div>
 <div class="top" id="top" style="display:none">
   <div class="in">
-    <span class="name">30 писем</span>
+    <button class="name" onclick="show('s-cover')" title="На главный экран">30 писем</button>
     <div class="bar"><i id="bar"></i></div>
     <span class="cnt" id="cnt">0/30</span>
   </div>
@@ -333,6 +335,10 @@ textarea::placeholder{color:var(--hint); font-style:italic}
   <div class="lockhint" id="lockhint"></div>
   <div class="shelfhint r d4">Письма приходят по одному в день.<br>Хорошие вещи не торопятся.</div>
   <div class="r d5" style="text-align:center; margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+    <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="show('s-intro')">ℹ️ как это устроено</button>
+    <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="show('s-cover')">🏠 главный экран</button>
+  </div>
+  <div class="r d6" style="text-align:center; margin-top:12px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
     <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="backup()">💾 сохранить прогресс в файл</button>
     <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="document.getElementById('restoreInp').click()">↩ восстановить из файла</button>
     <input type="file" id="restoreInp" accept=".json,application/json" style="display:none" onchange="restore(this)">
@@ -404,6 +410,7 @@ function show(id){
   el.classList.add("active");
   el.querySelectorAll(".r").forEach(r => { r.style.animation = "none"; r.offsetHeight; r.style.animation = ""; });
   document.getElementById("top").style.display = (id === "s-cover" || id === "s-intro") ? "none" : "block";
+  if (id === "s-cover" && state.start) document.querySelector("#s-cover .btn").textContent = "Продолжить";
   window.scrollTo({top: 0});
   updateBar();
 }
