@@ -282,6 +282,15 @@ textarea::placeholder{color:var(--hint); font-style:italic}
 .final{text-align:center; padding-top:6vh}
 .final .fq{font-family:var(--disp); font-style:italic; font-size:clamp(24px,6vw,32px); line-height:1.5; max-width:480px; margin:0 auto 26px}
 
+.linklike{ background:none; border:none; cursor:pointer; font-family:var(--ui); font-size:14px; color:var(--soft); text-decoration:underline; text-underline-offset:3px; padding:6px 10px }
+.linklike:hover{ color:var(--ink) }
+.xfer-ov{ position:fixed; inset:0; background:rgba(30,24,16,.55); z-index:60; display:flex; align-items:center; justify-content:center; padding:20px }
+.xfer-box{ background:var(--cream2, #fbf6ec); border:1px solid var(--brass); border-radius:16px; max-width:480px; width:100%; padding:26px 24px; box-shadow:0 24px 60px rgba(0,0,0,.25) }
+.xfer-box h3{ font-family:var(--serif, serif); font-size:22px; margin:0 0 8px; color:var(--ink) }
+.xfer-hint{ font-family:var(--ui); font-size:13.5px; line-height:1.55; color:var(--soft); margin:0 0 14px }
+.xfer-box textarea{ width:100%; min-height:110px; border:1px solid var(--brass); border-radius:10px; padding:12px; font-family:var(--ui); font-size:12.5px; line-height:1.5; color:var(--ink); background:#fff; resize:vertical; word-break:break-all }
+.xfer-btns{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; justify-content:center }
+.xfer-msg{ font-family:var(--ui); font-size:13.5px; color:var(--ink); text-align:center; margin-top:10px; min-height:18px }
 @media (prefers-reduced-motion: reduce){ *{animation-duration:.001s !important; transition-duration:.001s !important} }
 </style>
 </head>
@@ -305,11 +314,14 @@ textarea::placeholder{color:var(--hint); font-style:italic}
     <div class="orn"></div>
     <div class="author r d4">Макаров · @makarov.x1</div>
     <div id="fileWarn" style="display:none; margin:20px auto 0; max-width:430px; text-align:left; border:1px solid var(--brass); background:var(--cream2); border-radius:12px; padding:14px 16px; font-family:var(--ui); font-size:13.5px; line-height:1.55; color:var(--soft)">
-      ⚠️ <b>Важно, чтобы ответы не пропали:</b> открывай письма всегда по своей ссылке из покупки. Резервная копия: «Мои письма» → «сохранить прогресс в файл».
+      ⚠️ <b>Важно, чтобы ответы не пропали:</b> открывай письма всегда по своей ссылке из покупки. Перейти на новый телефон или планшет: «Мои письма» → «📲 перенести на другое устройство».
     </div>
     <div class="r d5" style="margin-top:32px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
       <button class="btn" onclick="start()">Получить первое письмо</button>
       <button class="btn ghost" onclick="show('s-intro')">Как это устроено</button>
+    </div>
+    <div class="r d6" style="margin-top:16px">
+      <button class="linklike" onclick="xferIn()">у меня есть код переноса</button>
     </div>
   </div>
 </section>
@@ -339,6 +351,7 @@ textarea::placeholder{color:var(--hint); font-style:italic}
     <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="show('s-cover')">🏠 главный экран</button>
   </div>
   <div class="r d6" style="text-align:center; margin-top:12px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+    <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="xferOut()">📲 перенести на другое устройство</button>
     <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="backup()">💾 сохранить прогресс в файл</button>
     <button class="btn ghost" style="font-size:13.5px; padding:10px 20px" onclick="document.getElementById('restoreInp').click()">↩ восстановить из файла</button>
     <input type="file" id="restoreInp" accept=".json,application/json" style="display:none" onchange="restore(this)">
@@ -377,6 +390,19 @@ textarea::placeholder{color:var(--hint); font-style:italic}
   </div>
 </section>
 
+</div>
+
+<div class="xfer-ov" id="xferOv" style="display:none" onclick="if(event.target===this)xferClose()">
+  <div class="xfer-box">
+    <h3 id="xferTitle"></h3>
+    <p class="xfer-hint" id="xferHint"></p>
+    <textarea id="xferTa" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+    <div class="xfer-btns">
+      <button class="btn" style="font-size:14px; padding:12px 24px" id="xferMain" onclick="xferAction()"></button>
+      <button class="btn ghost" style="font-size:14px; padding:12px 24px" onclick="xferClose()">закрыть</button>
+    </div>
+    <div class="xfer-msg" id="xferMsg"></div>
+  </div>
 </div>
 
 <script>
@@ -515,6 +541,89 @@ function restore(inp){
     }catch(e){ alert("Не получилось прочитать файл."); }
   };
   r.readAsText(f); inp.value = "";
+}
+
+/* ---- Код переноса: прогресс → компактная строка и обратно ---- */
+function b64u(bytes){ let s = ""; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function b64uDec(str){
+  str = str.replace(/-/g,"+").replace(/_/g,"/"); while (str.length % 4) str += "=";
+  const bin = atob(str), u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return u;
+}
+async function packState(){
+  const bytes = new TextEncoder().encode(JSON.stringify(state));
+  if (window.CompressionStream){
+    try{
+      const cs = new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+      return "M30.1." + b64u(new Uint8Array(await new Response(cs).arrayBuffer()));
+    }catch(e){}
+  }
+  return "M30.0." + b64u(bytes);
+}
+async function unpackState(code){
+  const m = (code || "").replace(/\s+/g, "").match(/^M30\.([01])\.([A-Za-z0-9_-]+)$/);
+  if (!m) throw new Error("format");
+  let bytes = b64uDec(m[2]);
+  if (m[1] === "1"){
+    if (!window.DecompressionStream) throw new Error("old-browser");
+    const ds = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    bytes = new Uint8Array(await new Response(ds).arrayBuffer());
+  }
+  const s = JSON.parse(new TextDecoder().decode(bytes));
+  if (typeof s !== "object" || !s.notes) throw new Error("format");
+  return s;
+}
+
+let xferMode = "out";
+function xferShow(mode){
+  xferMode = mode;
+  const ta = document.getElementById("xferTa");
+  document.getElementById("xferMsg").textContent = "";
+  if (mode === "out"){
+    document.getElementById("xferTitle").textContent = "Перенос на другое устройство";
+    document.getElementById("xferHint").textContent = "Скопируй код и отправь себе — например, в Telegram или на почту. Потом открой письма на новом устройстве, нажми «у меня есть код переноса» и вставь его.";
+    document.getElementById("xferMain").textContent = "скопировать код";
+    ta.value = "…"; ta.readOnly = true;
+    packState().then(c => { ta.value = c; });
+  } else {
+    document.getElementById("xferTitle").textContent = "Код переноса";
+    document.getElementById("xferHint").textContent = "Вставь сюда код с прежнего устройства — письма, ответы и отсчёт дней переедут сюда.";
+    document.getElementById("xferMain").textContent = "перенести";
+    ta.value = ""; ta.readOnly = false; ta.placeholder = "M30.…";
+  }
+  document.getElementById("xferOv").style.display = "flex";
+  if (mode === "in") ta.focus();
+}
+function xferOut(){ xferShow("out"); }
+function xferIn(){ xferShow("in"); }
+function xferClose(){ document.getElementById("xferOv").style.display = "none"; }
+async function xferAction(){
+  const ta = document.getElementById("xferTa"), msg = document.getElementById("xferMsg");
+  if (xferMode === "out"){
+    try{
+      if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(ta.value);
+      else { ta.select(); document.execCommand("copy"); }
+      msg.textContent = "Скопировано ✓ Отправь код себе и вставь на новом устройстве.";
+    }catch(e){
+      ta.select(); msg.textContent = "Код выделен — скопируй его вручную (Ctrl/Cmd+C).";
+    }
+    return;
+  }
+  try{
+    const s = await unpackState(ta.value);
+    const hasNotes = Object.values(state.notes || {}).some(v => v && v.trim());
+    if (hasNotes && !confirm("На этом устройстве уже есть записи. Заменить их перенесёнными?")) return;
+    state = s;
+    state.notes = state.notes || {}; state.lived = state.lived || {}; state.opened = state.opened || {};
+    save(); renderShelf(); updateBar(); xferClose();
+    document.querySelector("#s-cover .btn").textContent = "Продолжить";
+    show("s-shelf");
+  }catch(e){
+    msg.textContent = e.message === "old-browser"
+      ? "Браузер устарел и не может прочитать код. Обнови браузер или используй «восстановить из файла»."
+      : "Код не распознан. Проверь, что скопирован целиком — от M30. до конца.";
+  }
 }
 
 if (location.protocol === "file:") document.getElementById("fileWarn").style.display = "block";
